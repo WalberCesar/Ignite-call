@@ -21,6 +21,7 @@ import { z } from 'zod'
 import { getWeekDays } from '@/src/utils/get-week-days'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { convertTimeStringToMinutes } from '@/src/utils/convert-time-string-to-minutes'
+import { api } from '@/src/lib/axios'
 
 const timeIntervalsFormSchema = z.object({
   intervals: z
@@ -37,29 +38,28 @@ const timeIntervalsFormSchema = z.object({
     .refine((intervals) => intervals.length > 0, {
       message: 'Você precisa selecionar pelo menos um dia da semana',
     })
-    .transform((intervals) =>
-      intervals.map((interval) => {
+    .transform((intervals) => {
+      return intervals.map((interval) => {
         return {
           weekDay: interval.weekDay,
           startTimeInMinutes: convertTimeStringToMinutes(interval.startTime),
           endTimeInMinutes: convertTimeStringToMinutes(interval.endTime),
         }
-      }),
-    )
+      })
+    })
     .refine(
       (intervals) => {
-        intervals.every(
+        return intervals.every(
           (interval) =>
             interval.endTimeInMinutes - 60 >= interval.startTimeInMinutes,
         )
       },
       {
         message:
-          'O horário de término deve ser pelo menos 1h distante do início',
+          'O horário de término deve ser pelo menos 1h distante do início.',
       },
     ),
 })
-
 type TimeIntervalsFormInput = z.input<typeof timeIntervalsFormSchema>
 type TimeIntervalsFormOutput = z.output<typeof timeIntervalsFormSchema>
 
@@ -96,8 +96,11 @@ export default function TimeIntervals() {
   const weekDays = getWeekDays()
 
   async function handleSetTimeIntervals(data: any) {
-    const formData = data as TimeIntervalsFormOutput
-    console.log(formData)
+    const { intervals } = data as TimeIntervalsFormOutput
+
+    await api.post('/users/time-intervals', {
+      intervals,
+    })
   }
 
   return (
