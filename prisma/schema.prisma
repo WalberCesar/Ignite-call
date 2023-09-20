@@ -21,7 +21,7 @@ model User {
   created_at    DateTime           @default(now())
   timeIntervals UserTimeInterval[]
 
-  @@map("users")
+  @@map("users") //renomear a tabela 
 }
 
 model Account {
