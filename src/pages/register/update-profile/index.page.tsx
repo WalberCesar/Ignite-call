@@ -40,7 +40,7 @@ export default function UpdateProfile() {
       bio: data.bio,
     })
 
-    router.push(`schedule/${session?.data?.user.username}`)
+    router.push(`/schedule/${session?.data?.user.username}`)
   }
 
   return (
